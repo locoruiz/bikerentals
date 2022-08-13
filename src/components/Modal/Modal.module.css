@@ -1,0 +1,84 @@
+.background {
+    --duration: 500ms;
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    animation-name: fadein;
+    animation-duration: var(--duration);
+}
+
+.modal {
+    background-color: white;
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    width: fit-content;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-name: slidein;
+    animation-duration: var(--duration);
+    animation-timing-function: ease-out;
+    box-shadow: rgba(255, 255, 255, 0.1) 0px 10px 20px;
+}
+
+.header {
+    font-weight: bold;
+    font-size: 1.3rem;
+    position: relative;
+    min-height: 40px;
+    border-bottom: 1px solid var(--primary-color);
+    padding-top: 10px;
+    padding-left: 10px;
+}
+
+.header > span {
+    font-size: 1rem;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
+}
+
+.body {
+    padding: 10px;
+}
+
+.footer {
+    padding: 10px;
+    border-top: 1px solid var(--primary-color);
+    text-align: right;
+}
+
+.fadeOut {
+    opacity: 0;
+    transition: opacity var(--duration);
+}
+
+.slideOut {
+    animation-name: slidein;
+    animation-duration: var(--duration);
+    animation-direction: reverse;
+}
+
+
+
+@keyframes fadein {
+    0% {
+        opacity: 0;
+    }    
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes slidein {
+    0% {
+        top: 10%;
+    }
+    100% {
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+}

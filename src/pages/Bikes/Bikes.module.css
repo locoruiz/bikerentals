@@ -1,0 +1,47 @@
+.container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+}
+
+.modalFooter {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.form {
+    min-width: 500px;
+}
+
+/* Model */
+.table  tr > :nth-child(2), .table  tr > :nth-child(2) {
+    width: 50%;
+}
+/* Color */
+.table  tr > :nth-child(3), .table  tr > :nth-child(3) {
+    width: 10%;
+    text-align: center;
+}
+/* Location */
+.table  tr > :nth-child(4), .table  tr > :nth-child(4) {
+    width: 20%;
+}
+
+.table  tr > :nth-child(5), .table   tr > :nth-child(1), .table  tr > :nth-child(6) {
+    text-align: center;
+    width: 40px;
+}
+
+.table  tr > :nth-child(5), .table   tr > :nth-child(1), .table  tr > :nth-child(6) {
+    width: 40px;
+}

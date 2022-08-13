@@ -1,0 +1,12 @@
+.container {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.message {
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 5px;
+}

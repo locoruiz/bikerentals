@@ -1,0 +1,48 @@
+.title {
+    margin-left: 20px;
+}
+
+.table {
+    margin: 20px;
+    width: calc(100% - 40px);
+}
+
+.table > thead {
+    width: 100%;
+}
+/* Reservation ID */
+.table tbody tr > :nth-child(1), .table thead tr > :nth-child(1) {
+    width: 40px;
+    text-align: center;
+}
+/* From */
+.table tbody tr > :nth-child(2), .table thead tr > :nth-child(2) {
+    width: 100px;
+    text-align: center;
+}
+/* To */
+.table tbody tr > :nth-child(3), .table thead tr > :nth-child(3) {
+    width: 100px;
+    text-align: center;
+}
+
+/* Color */
+.table tbody tr > :nth-child(5), .table thead tr > :nth-child(5) {
+    text-align: center;
+}
+
+/* Actions */
+.table tbody tr > :nth-child(7), .table thead tr > :nth-child(7) {
+    width: 100px;
+}
+/* Color */
+.table tbody tr > :nth-child(8), .table thead tr > :nth-child(8) {
+    width: 100px;
+}
+
+
+.message {
+    padding: 20px;
+    text-align: center;
+    font-size: 1.3rem;
+}

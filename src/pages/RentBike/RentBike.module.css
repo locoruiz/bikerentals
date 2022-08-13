@@ -1,0 +1,73 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+h1 {
+    margin-left: 10px;
+}
+.filter {
+    border: 1px solid var(--primary-color);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.filter  h3 {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    min-width: 200px;
+    text-align: center;
+    row-gap: 5px;
+}
+
+.filters input {
+    width: 50px;
+}
+
+.form {
+    margin: 20px;
+    max-width: 600px;
+}
+
+.datesContainer {
+    display: flex;
+    gap: 10px;
+}
+
+/* Model */
+.table tbody tr > :nth-child(2), .table thead tr > :nth-child(2) {
+    width: 50%;
+}
+/* Color */
+.table tbody tr > :nth-child(3), .table thead tr > :nth-child(3) {
+    width: 10%;
+    text-align: center;
+}
+/* Location */
+.table tbody tr > :nth-child(4), .table thead tr > :nth-child(4) {
+    width: 20%;
+}
+
+.table tbody tr > :nth-child(5), .table  tbody tr > :nth-child(1), .table tbody tr > :nth-child(6) {
+    text-align: center;
+    width: 40px;
+}
+
+.table thead tr > :nth-child(5), .table  thead tr > :nth-child(1), .table thead tr > :nth-child(6) {
+    width: 40px;
+}
+
+@media screen and (max-width: 800px) {
+    .container {
+        flex-direction: column-reverse;
+        gap: 0px;
+    }
+}
