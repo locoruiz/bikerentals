@@ -27,3 +27,11 @@ export function dateToString(date: Date) {
     
     return `${date.getFullYear()}-${month}-${day}`
 }
+
+export function stringToDate(date: string) {
+    //Format must be yyyy-MM-DD
+    let year = +date.substring(0, 4)
+    let month = +date.substring(5, 7) - 1
+    let day = +date.substring(8, 10)
+    return new Date(year, month, day)
+}

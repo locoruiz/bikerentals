@@ -72,7 +72,7 @@ const Reservation: React.FC<IReservationProps> = (props) => {
             <div>
                 <h2 className={styles.title}>Reservations</h2>
                 <table className={'table '+styles.table}>
-                    <thead>
+                    <thead style={{width: reservations.length >= 8 ? 'calc(100% - 17px)' : '100%'}}>
                         <tr>
                             <th>#</th>
                             <th>From</th>

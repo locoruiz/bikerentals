@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styles from './RentBike.module.css'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import { dateToString } from '../../utils/dates'
+import { dateToString, stringToDate } from '../../utils/dates'
 import { BikeType } from '../../utils/types'
 import useApi from '../../hooks/useApi'
 import LoadPage from '../../components/LoadPage/LoadPage'
@@ -49,6 +49,12 @@ const RentBike: React.FC<IRentBikeProps> = (props) => {
             toDate: dateToString(today),
             bikeId: undefined
         },
+        validateOnChange: true,
+        validateOnBlur: false,
+        initialTouched: {
+            fromDate: true,
+            toDate: true
+        },
         validationSchema,
         onSubmit: values => {
             fetch('reservations', values, 'POST')
@@ -56,6 +62,7 @@ const RentBike: React.FC<IRentBikeProps> = (props) => {
                     console.log(res)
                     alert("Reservation made correctly")
                     formik.resetForm()
+                    loadBikes()
                 })
                 .catch(err => {
                     console.log(err)
@@ -67,16 +74,23 @@ const RentBike: React.FC<IRentBikeProps> = (props) => {
     const { fromDate, toDate } = formik.values;
 
     const loadBikes = useCallback(() => {
-        fetch(`bikes?fromDate=${fromDate}&toDate=${toDate}`)
+        console.log(fromDate, toDate)
+        let fromDateD = stringToDate(fromDate)
+        let toDateD = stringToDate(toDate)
+        toDateD.setHours(12)
+        toDateD.setMinutes(0)
+        toDateD.setSeconds(0)
+        if (fromDate && toDate && fromDateD >= today && fromDateD <= toDateD) {
+            fetch(`availableBikes?fromDate=${fromDate}&toDate=${toDate}`)
             .then(res => {
                 let modelsSet = new Set<string>()
                 let colorsSet = new Set<string>()
                 let locationsSet = new Set<string>()
 
                 res.data.forEach((bike: BikeType) => {
-                    modelsSet.add(bike.model)
-                    colorsSet.add(bike.color)
-                    locationsSet.add(bike.location)
+                    modelsSet.add(bike.model.toLowerCase())
+                    colorsSet.add(bike.color.toLowerCase())
+                    locationsSet.add(bike.location.toLowerCase())
                 })
 
                 setRentBike(res.data)
@@ -89,6 +103,8 @@ const RentBike: React.FC<IRentBikeProps> = (props) => {
             .catch(err => {
 
             })
+        }
+
     }, [fetch, fromDate, toDate])
 
     useEffect(() => {
@@ -113,13 +129,13 @@ const RentBike: React.FC<IRentBikeProps> = (props) => {
     const filteredRentBike = useMemo(() => {
         let result = [...bikes]
         if (models !== '') {
-            result = result.filter(item => item.model === models)
+            result = result.filter(item => item.model.toLowerCase() === models)
         }
         if (colors !== '') {
-            result = result.filter(item => item.color === colors)
+            result = result.filter(item => item.color.toLowerCase() === colors)
         }
         if (locations !== '') {
-            result = result.filter(item => item.location === locations)
+            result = result.filter(item => item.location.toLowerCase() === locations)
         }
         if (rating && !isNaN(rating) && rating > 0) {
             result = result.filter(item => Math.abs(item.rating - rating) < 0.1)
@@ -154,7 +170,11 @@ const RentBike: React.FC<IRentBikeProps> = (props) => {
                             filterLocations.map(item => <option key={item} value={item}>{item}</option>)
                         }
                     </select>
-                    Rate: <input onChange={handleFilterChange} value={filters.rating} name='rating' type={'number'} min={1} max={5}/>
+                    Rating: <input onChange={handleFilterChange} value={filters.rating} name='rating' type={'number'} min={1} max={5}/>
+                    <span></span>
+                    <button 
+                        onClick={() => {setFilters({models: '', colors: '', locations: '', rating: 0})}}
+                        className='btn btn-small btn-block'>Clear filters</button>
                 </div>
             </div>
             <form onSubmit={formik.handleSubmit}  className={styles.form}>
@@ -193,7 +213,7 @@ const RentBike: React.FC<IRentBikeProps> = (props) => {
                     </div>
                 </div>
                 <table className={'table '+styles.table}>
-                    <thead>
+                    <thead style={{width: filteredRentBike.length >= 11 ? 'calc(100% - 17px)' : '100%'}}>
                         <tr>
                             <th>#</th>
                             <th>Model</th>
@@ -210,8 +230,8 @@ const RentBike: React.FC<IRentBikeProps> = (props) => {
                                 <td>{bike.model}</td>
                                 <td>{bike.color}</td>
                                 <td>{bike.location}</td>
-                                <td>{(+bike.rating).toFixed(1)}</td>
-                                <td><input onClick={() => {selectBike(bike.id)}} name='bike' type={'radio'}/></td>
+                                <td>{+bike.rating < 1 ? '--' : (+bike.rating).toFixed(1)}</td>
+                                <td><input onChange={() => {selectBike(bike.id)}} type={'radio'} checked={formik.values.bikeId === bike.id}/></td>
                             </tr>)
                         }
                     </tbody>
