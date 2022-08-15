@@ -37,7 +37,8 @@ const Bikes: React.FC<IBikesProps> = (props) => {
         initialValues: {
             model: '',
             color: '',
-            location: ''
+            location: '',
+            available: true
         },
         validationSchema,
         onSubmit: values => {
@@ -153,7 +154,7 @@ const Bikes: React.FC<IBikesProps> = (props) => {
                             <th>Color</th>
                             <th>Location</th>
                             <th title='rating'>R.</th>
-                            <th title='Available today'>A.</th>
+                            <th title='Available for rental'>A.</th>
                             <th></th>
                         </tr>
                         {
@@ -270,6 +271,19 @@ const Bikes: React.FC<IBikesProps> = (props) => {
                             formik.touched.location && Boolean(formik.errors.location) &&
                             <div className="error">{formik.errors.location}</div>
                         }
+                    </div>
+                    <div className='form-control'>
+                        <label htmlFor='available'>Available for rental: 
+                        <input 
+                            style={{width: 'fit-content'}}
+                            type={'checkbox'} 
+                            id='available'
+                            name={'available'}
+                            checked={formik.values.available}
+                            onChange={formik.handleChange} 
+                            onBlur={formik.handleBlur}
+                            />
+                        </label>
                     </div>
                 </form>
             </Modal>

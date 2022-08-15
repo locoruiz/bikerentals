@@ -11,7 +11,7 @@ export type BikeType = {
     color: string, 
     location: string, 
     rating: number,
-    available?: boolean
+    available: boolean
 }
 
 export type ReservationType = {

@@ -2,7 +2,8 @@ import { useCallback, useContext, useState } from 'react'
 import axios, { AxiosResponse }  from 'axios'
 import { userContext } from '../context/userContext'
 
-const BASE_URL = 'http://localhost:5001/bikes-359120/us-central1/app/'
+//const BASE_URL = 'http://localhost:5001/bikes-359120/us-central1/app/'
+const BASE_URL = 'https://us-central1-bikes-359120.cloudfunctions.net/app/'
 
 export default function useApi() {
     const [loading, setLoading] = useState(false)
