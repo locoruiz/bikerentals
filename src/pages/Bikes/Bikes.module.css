@@ -25,7 +25,7 @@
 
 /* Model */
 .table  tr > :nth-child(2), .table  tr > :nth-child(2) {
-    width: 50%;
+    width: 40%;
 }
 /* Color */
 .table  tr > :nth-child(3), .table  tr > :nth-child(3) {
