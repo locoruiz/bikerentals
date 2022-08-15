@@ -1,20 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styles from './RentBike.module.css'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { dateToString } from '../../utils/dates'
 import { BikeType } from '../../utils/types'
+import useApi from '../../hooks/useApi'
+import LoadPage from '../../components/LoadPage/LoadPage'
 
 export interface IRentBikeProps {}
-
-//TODO: Eliminar estos datos de ejemplo
-const ARcolors = ['red', 'black', 'white', 'yellow']
-const ARmodels = ['Bianchi Kuma 29.2.', 'Trek Dual Sport 2', 'Mach City iBike ', 'Cannondale Trail 6', 'Ridley Helium SLA Disc 105']
-const ARlocations = ['La Paz', 'Cochabamba', 'Santa Cruz']
-
-const randomObject = (arr: any[]) => {
-    return arr[Math.floor(Math.random() * arr.length)]
-}
 
 const today = new Date()
 today.setHours(0)
@@ -48,6 +41,8 @@ const RentBike: React.FC<IRentBikeProps> = (props) => {
     const [filterModels, setFilterModels] = useState<string[]>([])
     const [filterColors, setFilterColors] = useState<string[]>([])
     const [filterLocations, setFilterLocations] = useState<string[]>([])
+    const { loading, fetch } = useApi()
+
     const formik = useFormik({
         initialValues: {
             fromDate: dateToString(today),
@@ -56,35 +51,49 @@ const RentBike: React.FC<IRentBikeProps> = (props) => {
         },
         validationSchema,
         onSubmit: values => {
-            console.log(values)
-            //TODO: Make reservation
+            fetch('reservations', values, 'POST')
+                .then(res => {
+                    console.log(res)
+                    alert("Reservation made correctly")
+                    formik.resetForm()
+                })
+                .catch(err => {
+                    console.log(err)
+                    alert("There was an error, please try again later")
+                })
         }
     })
 
+    const { fromDate, toDate } = formik.values;
+
+    const loadBikes = useCallback(() => {
+        fetch(`bikes?fromDate=${fromDate}&toDate=${toDate}`)
+            .then(res => {
+                let modelsSet = new Set<string>()
+                let colorsSet = new Set<string>()
+                let locationsSet = new Set<string>()
+
+                res.data.forEach((bike: BikeType) => {
+                    modelsSet.add(bike.model)
+                    colorsSet.add(bike.color)
+                    locationsSet.add(bike.location)
+                })
+
+                setRentBike(res.data)
+                
+                // Update filters
+                setFilterModels(Array.from<string>(modelsSet))
+                setFilterColors(Array.from<string>(colorsSet))
+                setFilterLocations(Array.from<string>(locationsSet))
+            })
+            .catch(err => {
+
+            })
+    }, [fetch, fromDate, toDate])
+
     useEffect(() => {
-        // TODO: Load bikes for the first day
-        let bikesCopy:BikeType[]  = []
-        let modelsSet = new Set<string>()
-        let colorsSet = new Set<string>()
-        let locationsSet = new Set<string>()
-
-        for (let i = 0; i < 100; i++) {
-            let model = randomObject(ARmodels)
-            let color = randomObject(ARcolors)
-            let location = randomObject(ARlocations)
-
-            bikesCopy.push({id: i.toString(), model, color, location, rating: Math.floor(Math.random() * 5) + 1})
-            modelsSet.add(model)
-            colorsSet.add(color)
-            locationsSet.add(location)
-        }
-        setRentBike(bikesCopy)
-        
-        // Update filters
-        setFilterModels(Array.from<string>(modelsSet))
-        setFilterColors(Array.from<string>(colorsSet))
-        setFilterLocations(Array.from<string>(locationsSet))
-    }, [])
+        loadBikes()
+    }, [loadBikes])
 
     const selectBike = (id: string) => {
         formik.setFieldValue('bikeId', id)
@@ -120,6 +129,9 @@ const RentBike: React.FC<IRentBikeProps> = (props) => {
 
     return (
         <>
+        {
+            loading && <LoadPage loading={loading}/>
+        }
         <div className={styles.container}>
             <div className={styles.filter}>
                 <h3>Filter by</h3>
@@ -198,7 +210,7 @@ const RentBike: React.FC<IRentBikeProps> = (props) => {
                                 <td>{bike.model}</td>
                                 <td>{bike.color}</td>
                                 <td>{bike.location}</td>
-                                <td>{bike.rating.toFixed(1)}</td>
+                                <td>{(+bike.rating).toFixed(1)}</td>
                                 <td><input onClick={() => {selectBike(bike.id)}} name='bike' type={'radio'}/></td>
                             </tr>)
                         }

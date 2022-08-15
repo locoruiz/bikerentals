@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import LoadPage from '../../components/LoadPage/LoadPage'
 import Modal from '../../components/Modal/Modal'
 import Rate from '../../components/Rate/Rate'
+import useApi from '../../hooks/useApi'
 import { toLocaleDateString } from '../../utils/dates'
 import { ReservationType } from '../../utils/types'
 
@@ -14,46 +16,29 @@ const Reservation: React.FC<IReservationProps> = (props) => {
 
     const [reservations, setReservations] = useState<ReservationType[]>([])
     const [showRate, setShowRate] = useState<ReservationType | undefined>(undefined)
-
+    const { loading, fetch } = useApi()
     useEffect(() => {
-        //TODO: Fetch from a server the reservations
-        let today = new Date()
-        let tomorrow = new Date()
-        tomorrow.setDate(today.getDate() + 1)
-        let res: ReservationType[] = [
-            {
-                id: 1,
-                fromDate: today,
-                toDate: tomorrow,
-                bike: {
-                    id: '1',
-                    model: 'Bianchi',
-                    color: 'red',
-                    location: 'Cochabamba',
-                    rating: 5
-                },
-                rating: 1
-            },
-            {
-                id: 2,
-                fromDate: today,
-                toDate: tomorrow,
-                bike: {
-                    id: '2',
-                    model: 'Bianchi',
-                    color: 'azul',
-                    location: 'Tarija',
-                    rating: 4.4
-                },
-                rating: 2
-            }
-        ]
-        setReservations(res)
-    }, [])
+        fetch('reservations')
+            .then(result => {
+                let res = result.data.map((item: any) => ({
+                    ...item,
+                    fromDate: new Date(item.fromDate),
+                    toDate: new Date(item.toDate)
+                }))
+                setReservations(res)
+            })
+    }, [fetch])
 
     const cancelReservation = (reservationId: number) => {
         if (window.confirm('Are you sure you want to cancel this reservation?')) {
-            setReservations(reservations.filter(res => res.id !== reservationId))
+            fetch('reservations/'+reservationId, {}, 'DELETE')
+                .then(() => {
+                    setReservations(reservations.filter(res => res.id !== reservationId))
+                })
+                .catch(err => {
+                    console.log(err)
+                    alert('There was an error canceling the reservation')
+                })
         }
     }
 
@@ -66,15 +51,24 @@ const Reservation: React.FC<IReservationProps> = (props) => {
     }
 
     const submitRate = () => {
-        //TODO: Submit rating
-        setReservations(res => res.map(r => r.id === showRate?.id ? {...showRate} : r))
-        
+        fetch('rate/'+showRate?.id, { rating: showRate?.rating }, 'PUT')
+            .then(result => {
+                setReservations(res => res.map(r => r.id === showRate?.id ? {...showRate} : r))
+            })
+            .catch(err => {
+                console.log(err)
+                alert('There was an error submitting the rating')
+            })
+
         hideRateModal()
     }
 
     return (
-        reservations.length === 0 ? <div className={styles.message}>You don't have reservations. <br/> Click <Link to={'/bikes'}>here</Link> to make a reservation</div> :
+        reservations.length === 0 && loading === false ? <div className={styles.message}>You don't have reservations. <br/> Click <Link to={'/bikes'}>here</Link> to make a reservation</div> :
         <>
+            {
+                loading && <LoadPage loading={loading}/>
+            }
             <div>
                 <h2 className={styles.title}>Reservations</h2>
                 <table className={'table '+styles.table}>
