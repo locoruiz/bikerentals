@@ -295,7 +295,7 @@ const Bikes: React.FC<IBikesProps> = (props) => {
                     </thead>
                     <tbody>
                         {
-                            users.map(user => <tr key={user.username}>
+                            users.map((user, index) => <tr key={index}>
                                 <td>{user.username}</td>
                                 <td style={{textAlign: 'center'}}>{user.fromDate.substring(0, 10)}</td>
                                 <td style={{textAlign: 'center'}}>{user.toDate.substring(0, 10)}</td>

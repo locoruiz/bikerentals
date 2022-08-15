@@ -64,7 +64,7 @@ const Reservation: React.FC<IReservationProps> = (props) => {
     }
 
     return (
-        reservations.length === 0 && loading === false ? <div className={styles.message}>You don't have reservations. <br/> Click <Link to={'/bikes'}>here</Link> to make a reservation</div> :
+        reservations.length === 0 && loading === false ? <div className={styles.message}>You don't have reservations. <br/> Click <Link to={'/rentBike'}>here</Link> to make a reservation</div> :
         <>
             {
                 loading && <LoadPage loading={loading}/>

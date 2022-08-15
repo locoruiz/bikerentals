@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import styles from './Users.module.css'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
@@ -6,6 +6,8 @@ import { UserType } from '../../utils/types'
 import useApi from '../../hooks/useApi'
 import Loader from '../../components/Loader/Loader'
 import Modal from '../../components/Modal/Modal'
+import LoadPage from '../../components/LoadPage/LoadPage'
+import { userContext } from '../../context/userContext'
 
 
 export interface IUsersProps {}
@@ -31,12 +33,26 @@ const validationSchema = yup.object({
     role: yup.string().required('Role is required')
 })
 
+type UsageType = {
+    id: number,
+    model: string,
+    color: string,
+    location: string,
+    fromDate: string, 
+    toDate: string
+}
+
 const Users: React.FC<IUsersProps> = (props) => {
     // Only available users
     const [users, setUsers] = useState<UserType[]>([])
     const [editingUser, setEditingUser] = useState<UserType | undefined>()
     const { loading, fetch } = useApi()
     const [formVisible, setFormVisible] = useState(false)
+    const [bikes, setBikes] = useState<UsageType[]>([])
+    const [showBikesModal, setShowBikesmodal] = useState(false)
+    const [pageLoad, setPageLoad] = useState(false)
+
+    const { user } = useContext(userContext)
 
     const formik = useFormik({
         initialValues: {
@@ -48,7 +64,7 @@ const Users: React.FC<IUsersProps> = (props) => {
         },
         validationSchema,
         onSubmit: values => {
-            closeForm()
+            setPageLoad(true)
             if (editingUser) {
                 let editObject: any = {}
                 if (values.password === '') {
@@ -64,7 +80,6 @@ const Users: React.FC<IUsersProps> = (props) => {
                         role: values.role
                     }
                 }
-                console.log(editObject)
                 fetch('users/'+editingUser.id, editObject, 'PUT')
                 .then((res) => {
                     setUsers(users.map(user => {
@@ -73,20 +88,24 @@ const Users: React.FC<IUsersProps> = (props) => {
                         }
                         return user
                     }))
+                    closeForm()
                 })
                 .catch(e => {
                     console.log(e)
                     alert('There was a problem, please try again later')
                 })
+                .finally(() => {setPageLoad(false)})
             } else {
                 fetch('users', values, 'POST')
                 .then((res) => {
                     setUsers([res.data, ...users])
+                    closeForm()
                 })
                 .catch(e => {
                     console.log(e)
                     alert('There was a problem, please try again later')
                 })
+                .finally(() => {setPageLoad(false)})
             }
         }
     })
@@ -127,7 +146,30 @@ const Users: React.FC<IUsersProps> = (props) => {
         formik.resetForm();
     }
 
+    const fetchBikes = (userId: number) => {
+        setPageLoad(true)
+        fetch(`users/${userId}/bikes`)
+            .then(res => {
+                if (res.data.length > 0) {
+                    setBikes(res.data)
+                    setShowBikesmodal(true)
+                } else {
+                    alert('This user never reserved a Bike')
+                }
+            })
+            .catch(err => {
+                console.log(err)
+                alert('There was a problem fetching the bikes, please try again later')
+            })
+            .finally(() => {setPageLoad(false)})
+    }
+
     return (
+        <>
+        {
+            pageLoad &&
+            <LoadPage loading={pageLoad}/>
+        }
         <div className={styles.container}>
             <div className={styles.header}>
                 <h1>Registered Users</h1>
@@ -138,8 +180,8 @@ const Users: React.FC<IUsersProps> = (props) => {
                 </button>
             </div>
             {
-                loading || users.length === 0 ?
-                loading ? <Loader/> : <h2>There are no users registered</h2>
+                (loading && pageLoad === false) || users.length === 0 ?
+                (loading && pageLoad === false) ? <Loader/> : <h2>There are no users registered</h2>
                 :
                 <table className={'table '+styles.table}>
                     <tbody>
@@ -161,6 +203,14 @@ const Users: React.FC<IUsersProps> = (props) => {
                                         className='btn btn-primary btn-small'
                                         >
                                             Edit
+                                    </button>&nbsp;
+                                    <button 
+                                        onClick={() => {fetchBikes(user.id)}} 
+                                        type={'button'}
+                                        className='btn btn-small'
+                                        title='Bikes reserved by user'
+                                        >
+                                            See bikes
                                     </button>
                                 </td>
                             </tr>)
@@ -262,6 +312,7 @@ const Users: React.FC<IUsersProps> = (props) => {
                             onChange={formik.handleChange} 
                             onBlur={formik.handleBlur}
                             style={{padding: '10px'}}
+                            disabled={user?.id === editingUser?.id}
                             >
                                 <option style={{padding: '10px'}}>User</option>
                                 <option style={{padding: '10px'}}>Manager</option>
@@ -273,7 +324,43 @@ const Users: React.FC<IUsersProps> = (props) => {
                     </div>
                 </form>
             </Modal>
+            <Modal 
+                title={ 'Bikes reserved by this user' }
+                visible={showBikesModal}
+                onClose={() => {setShowBikesmodal(false)}}
+                footer={
+                    <div className={styles.modalFooter}>
+                        <button 
+                            onClick={() => {setShowBikesmodal(false)}}
+                            className='btn btn-primary btn-small'>Close</button>
+                    </div>
+                }
+                >
+                <table className='table'>
+                    <thead style={{width: bikes.length <= 11 ? '100%' : 'calc(100% - 17px)'}}>
+                        <tr>
+                            <th>Id</th>
+                            <th>Model</th>
+                            <th>Color</th>
+                            <th>From</th>
+                            <th>To</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            bikes.map((bike, index) => <tr key={index}>
+                                <td>{bike.id}</td>
+                                <td>{bike.model}</td>
+                                <td>{bike.color}</td>
+                                <td style={{textAlign: 'center'}}>{bike.fromDate.substring(0, 10)}</td>
+                                <td style={{textAlign: 'center'}}>{bike.toDate.substring(0, 10)}</td>
+                            </tr>)
+                        }
+                    </tbody>
+                </table>
+            </Modal>
         </div>
+        </>
     )
 }
 
